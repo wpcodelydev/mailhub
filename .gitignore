@@ -84,3 +84,4 @@ client_secret.json
 
 # MailHub: local Mailsync build archive (not committed)
 /mailsync-local/
+*.pdb

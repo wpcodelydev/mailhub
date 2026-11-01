@@ -279,7 +279,7 @@ function buildPackagerOptions() {
       win32: path.resolve(appDir, 'build', 'resources', 'win', 'mailspring-square.ico'),
       linux: undefined,
     }[platform],
-    name: { darwin: 'Mailspring', win32: 'Mailspring', linux: 'mailspring' }[platform],
+    name: { darwin: 'MailHub', win32: 'MailHub', linux: 'mailhub' }[platform],
     appCopyright: `Copyright (C) 2014-${new Date().getFullYear()} Foundry 376, LLC. All rights reserved.`,
     derefSymlinks: false,
     asar: {
