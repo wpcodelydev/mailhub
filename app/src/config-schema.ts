@@ -93,7 +93,15 @@ export default {
       },
       disabledPackages: {
         type: 'array',
-        default: [],
+        default: [
+          'open-tracking',
+          'link-tracking',
+          'activity',
+          'participant-profile',
+          'thread-sharing',
+          'translation',
+          'composer-grammar-check',
+        ],
         items: {
           type: 'string',
         },

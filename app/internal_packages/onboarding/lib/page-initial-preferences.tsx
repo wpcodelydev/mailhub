@@ -4,7 +4,6 @@ import fs from 'fs';
 import { RetinaImg, Flexbox, ConfigPropContainer } from 'mailspring-component-kit';
 import { localized, AccountStore, IdentityStore, Account } from 'mailspring-exports';
 import * as OnboardingActions from './onboarding-actions';
-import NewsletterSignup from './newsletter-signup';
 
 // NOTE: Temporarily copied from preferences module
 class AppearanceModeOption extends React.Component<{
@@ -139,12 +138,6 @@ class InitialPreferencesOptions extends React.Component<
               </option>
             ))}
           </select>
-          <div style={{ paddingTop: 20 }}>
-            <NewsletterSignup
-              emailAddress={this.props.account.emailAddress}
-              name={this.props.account.name}
-            />
-          </div>
         </div>
       </div>
     );

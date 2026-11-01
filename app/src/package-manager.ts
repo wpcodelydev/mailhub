@@ -130,9 +130,8 @@ export default class PackageManager {
       return;
     }
 
-    if (pkg.isIdentityRequired() && !this.identityPresent) {
-      return;
-    }
+    // MailHub: packages no longer require a Mailspring ID. Packages that depend on
+    // Mailspring's paid servers are disabled by default in config-schema.ts instead.
 
     if (!pkg.isEngineSet()) {
       // don't use AppEnv.reportError, I don't want to know about these.

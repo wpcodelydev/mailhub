@@ -35,10 +35,7 @@ export default class AutoUpdateManager extends EventEmitter {
     this.specMode = specMode;
     this.preferredChannel = preferredChannel;
 
-    this.updateFeedURL();
-    this.config.onDidChange('identity.id', this.updateFeedURL);
-
-    setTimeout(() => this.setupAutoUpdater(), 0);
+    // MailHub: automatic updates from Mailspring's update server are disabled.
   }
 
   updateFeedURL = () => {
@@ -163,6 +160,8 @@ export default class AutoUpdateManager extends EventEmitter {
   }
 
   check({ hidePopups }: { hidePopups?: boolean } = {}) {
+    // MailHub: updates are disabled.
+    return;
     this.updateFeedURL();
     if (!hidePopups) {
       autoUpdater.once('update-not-available', this.onUpdateNotAvailable);
@@ -172,6 +171,7 @@ export default class AutoUpdateManager extends EventEmitter {
   }
 
   install() {
+    return;
     autoUpdater.quitAndInstall();
   }
 

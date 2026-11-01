@@ -63,7 +63,9 @@ class DraftFactory {
       version: 0,
       unread: false,
       starred: false,
-      headerMessageId: `${crypto.randomUUID().toUpperCase()}@getmailspring.com`,
+      headerMessageId: `${crypto.randomUUID().toUpperCase()}@${
+        ((account.emailAddress || '').split('@')[1] || 'mailhub.local').toLowerCase()
+      }`,
       from: [account.defaultMe()],
       date: new Date(),
       draft: true,

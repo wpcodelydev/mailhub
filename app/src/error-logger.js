@@ -39,13 +39,8 @@ module.exports = ErrorLogger = (function () {
 
     this._extendNativeConsole();
 
-    this.extensions = [
-      new SentryErrorReporter({
-        inSpecMode: args.inSpecMode,
-        inDevMode: args.inDevMode,
-        resourcePath: args.resourcePath,
-      }),
-    ];
+    // MailHub: errors are NOT reported to Mailspring's Sentry project.
+    this.extensions = [];
 
     if (this.inSpecMode) {
       return;
@@ -160,11 +155,11 @@ module.exports = ErrorLogger = (function () {
       return;
     }
     require('electron').crashReporter.start({
-      productName: 'Mailspring',
-      companyName: 'Mailspring',
+      productName: 'MailHub',
+      companyName: 'MailHub',
       submitURL: `https://id.getmailspring.com/report-crash?ver=${appVersion}&platform=${process.platform}`,
-      uploadToServer: true,
-      autoSubmit: true,
+      uploadToServer: false,
+      autoSubmit: false,
       extra: {
         ver: appVersion,
         platform: process.platform,

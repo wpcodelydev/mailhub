@@ -84,10 +84,13 @@ class _IdentityStore extends MailspringStore {
   }
 
   hasProFeatures() {
-    return this._identity && this._identity.stripePlanEffective !== 'Basic';
+    // MailHub: all locally-run features are always unlocked, there are no plans.
+    return true;
   }
 
   _fetchAndPollRemoteIdentity() {
+    // MailHub: never contact Mailspring's identity server.
+    return;
     if (!AppEnv.isMainWindow()) return;
     const poll = () => {
       // fetchIdentity can still reject for reasons other than the network request

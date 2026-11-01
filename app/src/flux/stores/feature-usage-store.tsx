@@ -110,6 +110,8 @@ class _FeatureUsageStore extends MailspringStore {
   }
 
   isUsable(feature: string) {
+    // MailHub: no quotas, no plans.
+    return true;
     const { usedInPeriod, quota } = this._dataForFeature(feature);
     if (!quota) {
       return true;
@@ -126,6 +128,8 @@ class _FeatureUsageStore extends MailspringStore {
   }
 
   markUsed(feature: string) {
+    // MailHub: do not record usage or send usage events to Mailspring's servers.
+    return;
     const next: IIdentity = JSON.parse(JSON.stringify(IdentityStore.identity()));
     if (!next || !next.featureUsage) return;
 
