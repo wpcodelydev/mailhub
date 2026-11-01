@@ -2,12 +2,10 @@
 /* eslint global-require: 0 */
 /* eslint quote-props: 0 */
 const path = require('path');
-const https = require('https');
 const fs = require('fs');
 const rimraf = require('rimraf');
 const targz = require('targz');
 const { safeExec } = require('./utils/child-process-wrapper.js');
-const { execSync } = require('child_process');
 
 const appDependencies = require('../app/package.json').dependencies;
 const rootDependencies = require('../package.json').dependencies;
@@ -44,66 +42,31 @@ function npm(cmd, options) {
   });
 }
 
-function getMailsyncURL(callback) {
-  const distKey = `${process.platform}-${process.arch}`;
-  const distDir = {
-    'darwin-x64': 'osx',
-    'darwin-arm64': 'osx',
-    'win32-x64': 'win-ia32', // At this time, Mailsync is still 32-bit
-    'win32-ia32': 'win-ia32',
-    'linux-x64': 'linux',
-    'linux-arm64': 'linux-arm64',
-    'linux-ia32': null,
-  }[distKey];
+// MailHub: we do NOT download the upstream prebuilt Mailsync from Mailspring's S3 bucket.
+// That binary refuses to run unless its path contains "mailspring". Instead we use our own
+// build from the mailhub-sync repository (GitHub Actions artifact "win-ia32-mailsync").
+// Put the artifact's mailsync.tar.gz in ./mailsync-local/ (or point the environment
+// variable MAILHUB_MAILSYNC_ARCHIVE at it) and run `npm run postinstall`.
+function installLocalMailsync() {
+  const archive =
+    process.env.MAILHUB_MAILSYNC_ARCHIVE ||
+    path.resolve(__dirname, '..', 'mailsync-local', 'mailsync.tar.gz');
 
-  if (!distDir) {
+  if (!fs.existsSync(archive)) {
     console.error(
-      `\nSorry, a Mailspring Mailsync build for your machine (${distKey}) is not yet available.`
+      `\nMailHub Mailsync archive not found: ${archive}\n` +
+        `Download "win-ia32-mailsync" from the mailhub-sync GitHub Actions run, unzip it,\n` +
+        `and place mailsync.tar.gz at that path, then run: npm run postinstall\n`
     );
     return;
   }
 
-  const out = execSync('git submodule status ./mailsync');
-  const [_, hash] = /[\+-]([A-Za-z0-9]{8})/.exec(out.toString());
-  callback(
-    `https://mailspring-builds.s3.amazonaws.com/mailsync/${hash}/${distDir}/mailsync.tar.gz`
-  );
-}
-
-function downloadMailsync() {
-  getMailsyncURL(distS3URL => {
-    https.get(distS3URL, response => {
-      if (response.statusCode === 200) {
-        response.pipe(fs.createWriteStream(`app/mailsync.tar.gz`));
-        response.on('end', () => {
-          console.log(
-            `\nDownloaded Mailsync prebuilt binary from ${distS3URL} to ./app/mailsync.tar.gz.`
-          );
-          targz.decompress(
-            {
-              src: `app/mailsync.tar.gz`,
-              dest: 'app/',
-            },
-            err => {
-              if (!err) {
-                console.log(`\nUnpackaged Mailsync into ./app.`);
-              } else {
-                console.error(`\nEncountered an error unpacking: ${err}`);
-              }
-            }
-          );
-        });
-      } else {
-        console.error(
-          `Sorry, an error occurred while fetching the Mailspring Mailsync build for your machine\n(${distS3URL})\n`
-        );
-        if (process.env.CI) {
-          throw new Error('Mailsync build not available.');
-        }
-        response.pipe(process.stderr);
-        response.on('end', () => console.error('\n'));
-      }
-    });
+  targz.decompress({ src: archive, dest: 'app/' }, err => {
+    if (!err) {
+      console.log(`\nUnpackaged Mailsync from ${archive} into ./app.`);
+    } else {
+      console.error(`\nEncountered an error unpacking ${archive}: ${err}`);
+    }
   });
 }
 
@@ -164,8 +127,8 @@ async function run() {
   // if the user hasn't cloned the mailsync module, download
   // the binary for their operating system that was shipped to S3.
   if (!fs.existsSync('./mailsync/build.sh')) {
-    console.log(`\n-- Downloading the last released version of Mailspring mailsync --`);
-    downloadMailsync();
+    console.log(`\n-- Installing the MailHub build of Mailsync from a local archive --`);
+    installLocalMailsync();
   } else {
     console.log(
       `\n-- You have the Mailspring mailsync submodule. If you'd prefer ` +
